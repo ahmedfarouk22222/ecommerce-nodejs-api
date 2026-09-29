@@ -9,6 +9,8 @@ const globalError = require('./middlewares/error_middlewares');
 const categoryRoute = require('./routes/category/category_route');
 const subCategoryRoute = require('./routes/category/sub_category_route');
 const brandRoute = require('./routes/brand/brands_route');
+const productRoute = require('./routes/product/product_route');
+
 
 //DBConnection
 dbConnection();
@@ -25,7 +27,8 @@ if (process.env.NODE_ENV === 'development') {
 //Mount Routes
 app.use('/api/v1/categories', categoryRoute);
 app.use('/api/v1/subcategories', subCategoryRoute);
-app.use('/api/v1/createBrand', brandRoute);
+app.use('/api/v1/Brands', brandRoute);
+app.use('/api/v1/Products', productRoute);
 
 
 app.all('/*splat', (req, res, next) => {

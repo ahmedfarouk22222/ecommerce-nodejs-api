@@ -26,7 +26,7 @@ const productShema = new mongoose.Schema({
     price: {
         type: Number,
         require: [true, 'Product Price Must Be Require'],
-        max: [20, 'To Long Product Price'],
+        max: [200000, 'To Long Product Price'],
     },
     priceAfterDiscount: {
         type: Number,
@@ -36,13 +36,13 @@ const productShema = new mongoose.Schema({
         require: [true, "Product Image Cover Is Require"],
     },
     images: [String],
-    color: [String],
+    colors: [String],
     category: {
         type: mongoose.Schema.ObjectId,
         ref: "Category",
         require: [true, 'Product must be belong to parent category']
     },
-    subCategory: [{
+    subcategories: [{
         type: mongoose.Schema.ObjectId,
         ref: 'SubCategory',
 
