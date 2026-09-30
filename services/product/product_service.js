@@ -4,13 +4,28 @@ const ProductModel = require("../../models/product/product_model");
 const ApiError = require("../../utils/api_error");
 
 exports.getProducts = asyncHandler(async (req, res) => {
+  // filtering
+  const queryStringObj = { ...req.query };
+  const excludesFields = ["page", "limit", "sort", "fields"];
+  excludesFields.forEach((field) => delete queryStringObj[field]);
+
+  let queryString = JSON.stringify(queryStringObj);
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt)\b/g,
+    (match) => `$${match}`,
+  );
+
+  // pagination
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 5;
   const skip = (page - 1) * limit;
-  const products = await ProductModel.find({})
+  console.log(JSON.parse(queryString)); // ← ضيف السطر دا مؤقتًا
+  const mongooseQuery = ProductModel.find(JSON.parse(queryString))
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name" });
+
+  const products = await mongooseQuery;
   res.status(200).json({ results: products.length, data: products });
 });
 exports.getProductById = asyncHandler(async (req, res, next) => {
