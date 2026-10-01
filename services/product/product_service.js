@@ -2,31 +2,24 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const ProductModel = require("../../models/product/product_model");
 const ApiError = require("../../utils/api_error");
+const { query } = require("express-validator");
+const ApiFeature = require("../../utils/api_feature");
 
 exports.getProducts = asyncHandler(async (req, res) => {
-  // filtering
-  const queryStringObj = { ...req.query };
-  const excludesFields = ["page", "limit", "sort", "fields"];
-  excludesFields.forEach((field) => delete queryStringObj[field]);
+  const countDocuments = await ProductModel.countDocuments();
+  const apifeature = new ApiFeature(ProductModel.find(), req.query)
+    .pagination(countDocuments)
+    .filter()
+    .search()
+    .limitFields()
+    .sort();
 
-  let queryString = JSON.stringify(queryStringObj);
-  queryString = queryString.replace(
-    /\b(gte|gt|lte|lt)\b/g,
-    (match) => `$${match}`,
-  );
-
-  // pagination
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 5;
-  const skip = (page - 1) * limit;
-  console.log(JSON.parse(queryString)); // ← ضيف السطر دا مؤقتًا
-  const mongooseQuery = ProductModel.find(JSON.parse(queryString))
-    .skip(skip)
-    .limit(limit)
-    .populate({ path: "category", select: "name" });
-
+  //Execute the query
+  const { mongooseQuery, paginationresult } = apifeature;
   const products = await mongooseQuery;
-  res.status(200).json({ results: products.length, data: products });
+  res
+    .status(200)
+    .json({ results: products.length, paginationresult, data: products });
 });
 exports.getProductById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
