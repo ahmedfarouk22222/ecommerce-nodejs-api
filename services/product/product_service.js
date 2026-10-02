@@ -4,6 +4,7 @@ const ProductModel = require("../../models/product/product_model");
 const ApiError = require("../../utils/api_error");
 const { query } = require("express-validator");
 const ApiFeature = require("../../utils/api_feature");
+const deleteFactory = require("../delete_factory");
 
 exports.getProducts = asyncHandler(async (req, res) => {
   const countDocuments = await ProductModel.countDocuments();
@@ -47,15 +48,7 @@ exports.updateProducts = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ data: updateProduct });
 });
-exports.deleteProduct = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const deleteProduct = await ProductModel.findByIdAndDelete(id);
-
-  if (!deleteProduct) {
-    return next(new ApiError(`Product not found by this id: ${id}`, 404));
-  }
-  res.status(204).send();
-});
+exports.deleteProduct = deleteFactory.deleteOne(ProductModel);
 
 exports.createProduct = asyncHandler(async (req, res) => {
   req.body.slug = slugify(req.body.name);
