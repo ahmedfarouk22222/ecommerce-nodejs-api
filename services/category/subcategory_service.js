@@ -2,7 +2,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const SubCategoryModel = require("../../models/category/sub_categpry_model");
 const ApiError = require("../../utils/api_error");
-const deleteFactory = require("../delete_factory");
+const handelerFactory = require("../handlerer_factory");
 
 exports.setCategoryIdToBody = async (req, res, next) => {
   if (!req.body.category) req.body.category = req.params.categoryId;
@@ -39,17 +39,5 @@ exports.getSubCategoryById = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ data: subCategoryById });
 });
-exports.updateSubCategory = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name, category } = req.body;
-  const updateSubCategory = await SubCategoryModel.findOneAndUpdate(
-    { _id: id },
-    { name: name, slug: slugify(name), category },
-    { new: true },
-  );
-  if (!updateSubCategory) {
-    return next(new ApiError(`SubCategory not found by this id: ${id}`, 404));
-  }
-  res.status(200).json({ data: updateSubCategory });
-});
-exports.deleteSubCategory = deleteFactory.deleteOne(SubCategoryModel);
+exports.updateSubCategory = handelerFactory.updateOne(SubCategoryModel);
+exports.deleteSubCategory = handelerFactory.deleteOne(SubCategoryModel);

@@ -2,7 +2,7 @@ const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const BrandModel = require("../../models/brands/brand_model");
 const ApiError = require("../../utils/api_error");
-const deleteFactory = require("../delete_factory");
+const handelerFactory = require("../handlerer_factory");
 
 exports.createBrand = asyncHandler(async (req, res) => {
   const { name } = req.body;
@@ -24,17 +24,5 @@ exports.getBrandById = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ data: getBrandById });
 });
-exports.updateBrand = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name } = req.body;
-  const updateBrand = await BrandModel.findOneAndUpdate(
-    { _id: id },
-    { name: name, slug: slugify(name) },
-    { new: true },
-  );
-  if (!updateBrand) {
-    return next(new ApiError(`Brand not found by this id: ${id}`, 404));
-  }
-  res.status(200).json({ data: updateBrand });
-});
-exports.deleteBrand = deleteFactory.deleteOne(BrandModel);
+exports.updateBrand = handelerFactory.updateOne(BrandModel);
+exports.deleteBrand = handelerFactory.deleteOne(BrandModel);

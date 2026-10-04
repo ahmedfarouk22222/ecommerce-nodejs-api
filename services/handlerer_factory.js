@@ -11,3 +11,21 @@ exports.deleteOne = (model) =>
     }
     res.status(204).send();
   });
+exports.updateOne = (model) =>
+  asyncHandler(async (req, res, next) => {
+    const updateDocument = await model.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+      },
+    );
+
+    if (!updateDocument) {
+      return next(
+        new ApiError(`Brand not found by this id: ${req.params.id}`, 404),
+      );
+    }
+
+    res.status(200).json({ data: updateDocument });
+  });
