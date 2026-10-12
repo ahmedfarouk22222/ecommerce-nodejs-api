@@ -1,27 +1,33 @@
 const mongooese = require("mongoose");
+const becrypt = require("bcryptjs");
 const UserSchema = mongooese.Schema(
   {
     name: {
       type: String,
-      require: [true, "name is required"],
+      required: [true, "name is required"],
       minlength: [5, "name must be at least 5"],
-      maxlength: [20, "name to long"],
+      maxlength: [20, "name too long"],
     },
-    slug: { type: String, lowercase: true },
+
     email: {
       type: String,
-      require: [true, "email is required"],
+      required: [true, "email is required"],
       unique: true,
       lowercase: true,
     },
+
     password: {
       type: String,
-      require: [true, "password is required"],
+      required: [true, "password is required"],
       minlength: [5, "password must be at least 5"],
-      maxlength: [20, "password to long"],
+      maxlength: [20, "password too long"],
+    },
+    phone: {
+      type: String,
+      required: [true, "phone is required"],
     },
     role: {
-      type: [],
+      type: String,
       enum: ["user", "admin"],
       default: "user",
     },
@@ -29,4 +35,8 @@ const UserSchema = mongooese.Schema(
 
   { timestamps: true },
 );
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await becrypt.hash(this.password, 12);
+});
 module.exports = mongooese.model("User", UserSchema);

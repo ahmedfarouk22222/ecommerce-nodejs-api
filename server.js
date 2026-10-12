@@ -9,6 +9,7 @@ const categoryRoute = require("./routes/category/category_route");
 const subCategoryRoute = require("./routes/category/sub_category_route");
 const brandRoute = require("./routes/brand/brands_route");
 const productRoute = require("./routes/product/product_route");
+const UserRoute = require("./routes/user/user_route");
 
 //DBConnection
 dbConnection();
@@ -27,6 +28,7 @@ app.use("/api/v1/categories", categoryRoute);
 app.use("/api/v1/subcategories", subCategoryRoute);
 app.use("/api/v1/Brands", brandRoute);
 app.use("/api/v1/Products", productRoute);
+app.use("/api/v1/Users", UserRoute);
 
 app.all("/*splat", (req, res, next) => {
   const err = new ApiError(
