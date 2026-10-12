@@ -2,6 +2,7 @@ const slugify = require("slugify");
 const { check, body } = require("express-validator");
 const validatorMiddleware = require("../../../middlewares/validator_middleware");
 const User = require("../../../models/user/user_model");
+const becrypt = require("bcryptjs");
 
 exports.createUserValidator = [
   check("name")
@@ -48,6 +49,38 @@ exports.createUserValidator = [
 
   check("role").optional(),
 
+  validatorMiddleware,
+];
+exports.changePasswordValidator = [
+  check("id").isMongoId().withMessage("invalid Category Id"),
+  check("currentPassword")
+    .notEmpty()
+    .withMessage("currentPassword is required"),
+  check("password")
+    .notEmpty()
+    .withMessage("password is required")
+    .custom(async (val, { req }) => {
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        throw new Error("User not found");
+      }
+      const isPasswordCorrect = await becrypt.compare(
+        req.body.currentPassword,
+        user.password,
+      );
+      if (!isPasswordCorrect) {
+        throw new Error("inCoorect Current Password");
+      }
+    }),
+  check("newPasswordConfirmation")
+    .notEmpty()
+    .withMessage("Password confirmation is required")
+    .custom((val, { req }) => {
+      if (val !== req.body.password) {
+        throw new Error("Password confirmation does not match");
+      }
+      return true;
+    }),
   validatorMiddleware,
 ];
 

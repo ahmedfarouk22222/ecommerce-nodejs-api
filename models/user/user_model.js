@@ -24,7 +24,6 @@ const UserSchema = mongooese.Schema(
     },
     phone: {
       type: String,
-      required: [true, "phone is required"],
     },
     role: {
       type: String,
