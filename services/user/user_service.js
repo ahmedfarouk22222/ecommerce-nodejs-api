@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const UserModel = require("../../models/user/user_model");
 const ApiError = require("../../utils/api_error");
 const handelerFactory = require("../handlerer_factory");
+const becrypt = require("bcryptjs");
 
 exports.createUser = asyncHandler(async (req, res) => {
   const user = await UserModel.create(req.body);
@@ -23,5 +24,45 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
   }
   res.status(200).json({ data: getUserById });
 });
-exports.updateUser = handelerFactory.updateOne(UserModel);
+exports.updateUser = asyncHandler(async (req, res, next) => {
+  const updateDocument = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      role: req.body.role,
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!updateDocument) {
+    return next(
+      new ApiError(`Brand not found by this id: ${req.params.id}`, 404),
+    );
+  }
+
+  res.status(200).json({ data: updateDocument });
+});
+exports.changePassword = asyncHandler(async (req, res, next) => {
+  const updateDocument = await UserModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      password: await becrypt.hash(req.body.password, 12),
+    },
+    {
+      new: true,
+    },
+  );
+
+  if (!updateDocument) {
+    return next(
+      new ApiError(`Brand not found by this id: ${req.params.id}`, 404),
+    );
+  }
+
+  res.status(200).json({ data: updateDocument });
+});
 exports.deleteUser = handelerFactory.deleteOne(UserModel);
