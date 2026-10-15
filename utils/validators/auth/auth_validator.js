@@ -66,3 +66,11 @@ exports.getUserValidator = [
   check("id").isMongoId().withMessage("Invalid User id format"),
   validatorMiddleware,
 ];
+exports.forgetPasswordValidator = [
+  check("email")
+    .notEmpty()
+    .withMessage("Email required")
+    .isEmail()
+    .withMessage("Invalid email address"),
+  validatorMiddleware,
+];

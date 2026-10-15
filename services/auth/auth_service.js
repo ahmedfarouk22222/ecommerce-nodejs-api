@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const ApiError = require("../../utils/api_error");
@@ -73,3 +74,23 @@ exports.allowedTo = (...roles) =>
     }
     next();
   });
+
+exports.forgetPassword = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new ApiError(`There is No User With this email:${req.body.email}`, 404),
+    );
+  }
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashResetCode = crypto
+    .createHash("sha256")
+    .update(resetCode)
+    .digest("hex");
+
+  user.passwordResetCode = hashResetCode;
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  user.passwordResetVerified = false;
+
+  await user.save();
+});

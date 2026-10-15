@@ -20,9 +20,11 @@ const UserSchema = mongooese.Schema(
       type: String,
       required: [true, "password is required"],
       minlength: [5, "password must be at least 5"],
-      maxlength: [20, "password too long"],
     },
     changePasswordAt: Date,
+    passwordResetCode: String,
+    passwordResetExpires: Date,
+    passwordResetVerified: Boolean,
     phone: {
       type: String,
     },
