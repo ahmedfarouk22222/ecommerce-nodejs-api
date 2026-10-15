@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const ApiError = require("../../utils/api_error");
 const UserModel = require("../../models/user/user_model");
 const becrypt = require("bcryptjs");
+const sendEmail = require("../../utils/email/send_email");
 
 exports.signUp = asyncHandler(async (req, res) => {
   const user = await UserModel.create({
@@ -93,4 +94,59 @@ exports.forgetPassword = asyncHandler(async (req, res, next) => {
   user.passwordResetVerified = false;
 
   await user.save();
+  const message = `Hi ${user.name},\n\nYou requested a password reset. Please use the following code to reset your password:\n\n${resetCode}\n\nThis code will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.\n\nThank you,\nYour Company Name`;
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Your password reset code",
+      message: message,
+    });
+  } catch (err) {
+    user.passwordResetCode = undefined;
+    user.passwordResetExpires = undefined;
+    user.passwordResetVerified = undefined;
+    await user.save();
+    return next(new ApiError("There is an error in sending email", 500));
+  }
+  res.status(200).json({
+    status: "success",
+    message: "Reset code sent to email",
+  });
+});
+exports.vertifyResetCode = asyncHandler(async (req, res, next) => {
+  const hashResetCode = crypto
+    .createHash("sha256")
+    .update(req.body.resetCode)
+    .digest("hex");
+  const user = await UserModel.findOne({
+    passwordResetCode: hashResetCode,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new ApiError("Reset code is invalid or expired", 400));
+  }
+  user.passwordResetVerified = true;
+  await user.save();
+  res.status(200).json({ status: "Success" });
+});
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findOne({ email: req.body.email });
+  if (!user) {
+    return next(
+      new ApiError(`There is No User With this email:${req.body.email}`, 404),
+    );
+  }
+  if (!user.passwordResetVerified) {
+    return next(new ApiError("Reset code not verified", 400));
+  }
+  user.password = req.body.newpassword;
+  user.passwordResetCode = undefined;
+  user.passwordResetExpires = undefined;
+  user.passwordResetVerified = undefined;
+  await user.save();
+  const token = jwt.sign({ UserId: user.id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE_DATE,
+  });
+
+  res.status(200).json({ status: "Success", token });
 });
