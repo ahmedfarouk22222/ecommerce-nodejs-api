@@ -22,12 +22,13 @@ const UserSchema = mongooese.Schema(
       minlength: [5, "password must be at least 5"],
       maxlength: [20, "password too long"],
     },
+    changePasswordAt: Date,
     phone: {
       type: String,
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "manager", "admin"],
       default: "user",
     },
   },

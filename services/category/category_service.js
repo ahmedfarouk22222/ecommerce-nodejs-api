@@ -24,7 +24,7 @@ exports.updateCategory = handelerFactory.updateOne(CategoryModel);
 exports.deleteCategory = handelerFactory.deleteOne(CategoryModel);
 
 exports.createCategory = asyncHandler(async (req, res) => {
-  const { name } = req.body.name;
+  const { name } = req.body;
   const category = await CategoryModel.create({ name, slug: slugify(name) });
   res.status(201).json({ data: category });
 });

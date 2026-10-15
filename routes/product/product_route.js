@@ -14,12 +14,31 @@ const {
 } = require("../../services/product/product_service");
 
 const router = express.Router();
+const AuthService = require("../../services/auth/auth_service");
 
-router.route("/").post(createProductValidator, createProduct).get(getProducts);
+router
+  .route("/")
+  .post(
+    AuthService.protect,
+    AuthService.allowedTo("admin", "manager"),
+    createProductValidator,
+    createProduct,
+  )
+  .get(getProducts);
 router
   .route("/:id")
   .get(getProductValidator, getProductById)
-  .put(updateProductValidator, updateProducts)
-  .delete(deleteProductValidator, deleteProduct);
+  .put(
+    AuthService.protect,
+    AuthService.allowedTo("admin", "manager"),
+    updateProductValidator,
+    updateProducts,
+  )
+  .delete(
+    AuthService.protect,
+    AuthService.allowedTo("admin", "manager"),
+    deleteProductValidator,
+    deleteProduct,
+  );
 
 module.exports = router;
