@@ -3,7 +3,20 @@ const asyncHandler = require("express-async-handler");
 const CategoryModel = require("../../models/category/category_model");
 const ApiError = require("../../utils/api_error");
 const handelerFactory = require("../handlerer_factory");
+const multer = require("multer");
+const multerStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/categories");
+  },
+  filename: function (req, file, cb) {
+    const ext = file.mimetype.split("/")[1];
+    filename = `category-${req.user.id}-${Date.now()}.${ext}`;
+    cb(null, filename);
+  },
+});
+const upload = multer({ storage: multerStorage });
 
+exports.uploadCategoryImage = upload.single("image");
 exports.getCategories = asyncHandler(async (req, res) => {
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 5;
