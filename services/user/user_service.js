@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken");
 const slugify = require("slugify");
 const asyncHandler = require("express-async-handler");
 const UserModel = require("../../models/user/user_model");
@@ -67,3 +68,38 @@ exports.changePassword = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: updateDocument });
 });
 exports.deleteUser = handelerFactory.deleteOne(UserModel);
+exports.getLoogedUserData = asyncHandler(async (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+});
+exports.changeLoggedUserPassword = asyncHandler(async (req, res, next) => {
+  const user = await UserModel.findByIdAndUpdate(
+    req.user.id,
+    {
+      password: await becrypt.hash(req.body.password, 12),
+      changePasswordAt: Date.now(),
+    },
+    {
+      new: true,
+    },
+  );
+  const token = jwt.sign({ UserId: user.id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE_DATE,
+  });
+  res.status(200).json({ data: user, token });
+});
+exports.updateLogedUser = asyncHandler(async (req, res, next) => {
+  const updateUser = await UserModel.findByIdAndUpdate(
+    req.user.id,
+    {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+    },
+    {
+      new: true,
+    },
+  );
+
+  res.status(200).json({ data: updateUser });
+});
