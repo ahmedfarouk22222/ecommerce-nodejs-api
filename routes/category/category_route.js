@@ -1,5 +1,4 @@
 const express = require("express");
-const multer = require("multer");
 const {
   getCategoryValidator,
   createCategoryValidator,
@@ -13,12 +12,12 @@ const {
   updateCategory,
   deleteCategory,
   uploadCategoryImage,
+  imageProcessing,
 } = require("../../services/category/category_service");
 const AuthService = require("../../services/auth/auth_service");
 
 const router = express.Router();
 const subCategoryRoute = require("./sub_category_route");
-const upload = multer({ dest: "uploads/categories" });
 
 router.use("/:categoryId/subcategories", subCategoryRoute);
 router
@@ -28,10 +27,7 @@ router
     AuthService.protect,
     AuthService.allowedTo("admin", "manager"),
     uploadCategoryImage,
-    (req, res, next) => {
-      console.log(req.file);
-      next();
-    },
+    imageProcessing,
     createCategoryValidator,
     createCategory,
   );
@@ -41,6 +37,8 @@ router
   .put(
     AuthService.protect,
     AuthService.allowedTo("admin", "manager"),
+    uploadCategoryImage,
+    imageProcessing,
     updateCategoryValidator,
     updateCategory,
   )
