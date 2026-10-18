@@ -3,29 +3,11 @@ const asyncHandler = require("express-async-handler");
 const CategoryModel = require("../../models/category/category_model");
 const ApiError = require("../../utils/api_error");
 const handelerFactory = require("../handlerer_factory");
-const multer = require("multer");
 const sharp = require("sharp");
-// const multerStorage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, "uploads/categories");
-//   },
-//   filename: function (req, file, cb) {
-//     const ext = file.mimetype.split("/")[1];
-//     filename = `category-${req.user.id}-${Date.now()}.${ext}`;
-//     cb(null, filename);
-//   },
-// });
+const {
+  uploadSingleImage,
+} = require("../../middlewares/upload_single_image_middleware");
 
-const multerStorage = multer.memoryStorage();
-const multerFilter = function (req, file, cb) {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
-  } else {
-    cb(new ApiError("only images allowed", 400), false);
-  }
-};
-
-const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 exports.imageProcessing = asyncHandler(async (req, res, next) => {
   const format = "jpeg";
   const filename = `category-${req.user.id}-${Date.now()}.${format}`;
@@ -37,7 +19,7 @@ exports.imageProcessing = asyncHandler(async (req, res, next) => {
   req.body.image = filename;
   next();
 });
-exports.uploadCategoryImage = upload.single("image");
+exports.uploadCategoryImage = uploadSingleImage("image");
 exports.getCategories = asyncHandler(async (req, res) => {
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 5;

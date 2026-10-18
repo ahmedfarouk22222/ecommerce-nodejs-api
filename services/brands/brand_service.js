@@ -3,10 +3,30 @@ const asyncHandler = require("express-async-handler");
 const BrandModel = require("../../models/brands/brand_model");
 const ApiError = require("../../utils/api_error");
 const handelerFactory = require("../handlerer_factory");
+const sharp = require("sharp");
+const {
+  uploadSingleImage,
+} = require("../../middlewares/upload_single_image_middleware");
+exports.uploadBrandImage = uploadSingleImage("image");
+exports.imageProcessing = exports.imageProcessing = asyncHandler(
+  async (req, res, next) => {
+    const format = "jpeg";
+    const filename = `brand-${req.user.id}-${Date.now()}.${format}`;
+    await sharp(req.file.buffer)
+      .resize(900, 600)
+      .toFormat(format)
+      .jpeg({ quality: 90 })
+      .toFile(`uploads/brands/${filename}`);
+    req.body.image = filename;
+    next();
+  },
+);
 
 exports.createBrand = asyncHandler(async (req, res) => {
-  const { name } = req.body;
-  const brand = await BrandModel.create({ name: name, slug: slugify(name) });
+  const brand = await BrandModel.create({
+    ...req.body,
+    slug: slugify(req.body.name),
+  });
   res.status(201).json({ data: brand });
 });
 exports.getBrands = asyncHandler(async (req, res) => {
