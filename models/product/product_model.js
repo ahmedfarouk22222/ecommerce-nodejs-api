@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const productShema = new mongoose.Schema(
+const productSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -66,5 +66,29 @@ const productShema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+productSchema.post("init", (doc) => {
+  if (doc.imageCover) {
+    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+    doc.imageCover = imageUrl;
+  }
+  if (doc.images) {
+    const imagesUrl = doc.images.map(
+      (img) => `${process.env.BASE_URL}/products/${img}`,
+    );
+    doc.images = imagesUrl;
+  }
+});
+productSchema.post("save", (doc) => {
+  if (doc.imageCover) {
+    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
+    doc.imageCover = imageUrl;
+  }
+  if (doc.images) {
+    const imagesUrl = doc.images.map(
+      (img) => `${process.env.BASE_URL}/products/${img}`,
+    );
+    doc.images = imagesUrl;
+  }
+});
 
-module.exports = mongoose.model("Product", productShema);
+module.exports = mongoose.model("Product", productSchema);
