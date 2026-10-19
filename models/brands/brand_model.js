@@ -14,13 +14,13 @@ const brandShema = mongoose.Schema(
   },
   { timestamp: true },
 );
-brandSchema.post("init", (doc) => {
+brandShema.post("init", (doc) => {
   if (doc.image) {
     const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
     doc.image = imageUrl;
   }
 });
-brandSchema.post("save", (doc) => {
+brandShema.post("save", (doc) => {
   if (doc.image) {
     const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
     doc.image = imageUrl;

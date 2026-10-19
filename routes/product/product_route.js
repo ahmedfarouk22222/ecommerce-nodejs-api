@@ -11,6 +11,8 @@ const {
   getProductById,
   updateProducts,
   deleteProduct,
+  uploadProductImage,
+  resizeProductImage,
 } = require("../../services/product/product_service");
 
 const router = express.Router();
@@ -21,6 +23,8 @@ router
   .post(
     AuthService.protect,
     AuthService.allowedTo("admin", "manager"),
+    uploadProductImage,
+    resizeProductImage,
     createProductValidator,
     createProduct,
   )
@@ -31,6 +35,8 @@ router
   .put(
     AuthService.protect,
     AuthService.allowedTo("admin", "manager"),
+    uploadProductImage,
+    resizeProductImage,
     updateProductValidator,
     updateProducts,
   )

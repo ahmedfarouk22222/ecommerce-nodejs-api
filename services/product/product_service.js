@@ -1,10 +1,53 @@
+const multer = require("multer");
 const slugify = require("slugify");
+const sharp = require("sharp");
 const asyncHandler = require("express-async-handler");
 const ProductModel = require("../../models/product/product_model");
 const ApiError = require("../../utils/api_error");
 const { query } = require("express-validator");
 const ApiFeature = require("../../utils/api_feature");
 const handelerFactory = require("../handlerer_factory");
+
+const multerStorage = multer.memoryStorage();
+const multerFilter = function (req, file, cb) {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new ApiError("only images allowed", 400), false);
+  }
+};
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+exports.uploadProductImage = upload.fields([
+  { name: "imageCover", maxCount: 1 },
+  { name: "images", maxCount: 5 },
+]);
+exports.resizeProductImage = asyncHandler(async (req, res, next) => {
+  if (req.files.imageCover) {
+    const imageCoverFileName = `product-${req.params.id}-${Date.now()}-cover.jpeg`;
+    await sharp(req.files.imageCover[0].buffer)
+      .resize(2000, 1333)
+      .toFormat("jpeg")
+      .jpeg({ quality: 95 })
+      .toFile(`uploads/products/${imageCoverFileName}`);
+    req.body.imageCover = imageCoverFileName;
+  }
+  if (req.files.images) {
+    req.body.images = [];
+    await Promise.all(
+      req.files.images.map(async (img, index) => {
+        const imageName = `product-${req.params.id}-${Date.now()}-${index + 1}.jpeg`;
+        await sharp(img.buffer)
+          .resize(2000, 1333)
+          .toFormat("jpeg")
+          .jpeg({ quality: 95 })
+          .toFile(`uploads/products/${imageName}`);
+        req.body.images.push(imageName);
+      }),
+    );
+    next();
+  }
+});
 
 exports.getProducts = asyncHandler(async (req, res) => {
   const countDocuments = await ProductModel.countDocuments();
