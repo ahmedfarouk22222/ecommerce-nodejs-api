@@ -3,13 +3,15 @@ const asyncHandler = require("express-async-handler");
 const ReviewModel = require("../../models/reviews/review_model");
 const ApiError = require("../../utils/api_error");
 const handelerFactory = require("../handlerer_factory");
-
 exports.createReview = asyncHandler(async (req, res) => {
-  const Review = await ReviewModel.create({
-    ...req.body,
-    slug: slugify(req.body.name),
+  const review = await ReviewModel.create({
+    title: req.body.title,
+    rating: req.body.rating,
+    product: req.body.product,
+    user: req.user.id,
   });
-  res.status(201).json({ data: Review });
+
+  res.status(201).json({ data: review });
 });
 exports.getReviews = asyncHandler(async (req, res) => {
   const page = req.query.page * 1 || 1;

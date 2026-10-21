@@ -67,10 +67,16 @@ exports.getProducts = asyncHandler(async (req, res) => {
 });
 exports.getProductById = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const getProduct = await ProductModel.findById(id).populate({
-    path: "category",
-    select: "name",
-  });
+
+  const getProduct = await ProductModel.findById(id)
+    .populate({
+      path: "category",
+      select: "name",
+    })
+    .populate({
+      path: "reviews",
+      select: "title rating user",
+    });
   if (!getProduct) {
     return next(new ApiError(`Product not found by this id: ${id}`, 404));
   }
