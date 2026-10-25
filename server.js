@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+
 dotenv.config({ path: "config.env" });
 const ApiError = require("./utils/api_error");
 const dbConnection = require("./config/database");
@@ -13,6 +14,7 @@ const productRoute = require("./routes/product/product_route");
 const UserRoute = require("./routes/user/user_route");
 const AuthRoute = require("./routes/auth/auth_route");
 const ReviewsRoute = require("./routes/reviews/reviews_route");
+const AddToWishListRoute = require("./routes/user/add_to_wishlist");
 
 //DBConnection
 dbConnection();
@@ -35,6 +37,7 @@ app.use("/api/v1/Products", productRoute);
 app.use("/api/v1/Users", UserRoute);
 app.use("/api/v1/auth", AuthRoute);
 app.use("/api/v1/Reviews", ReviewsRoute);
+app.use("/api/v1/wishlist", AddToWishListRoute);
 
 app.all("/*splat", (req, res, next) => {
   const err = new ApiError(

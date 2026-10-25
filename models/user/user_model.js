@@ -1,5 +1,6 @@
 const mongooese = require("mongoose");
 const becrypt = require("bcryptjs");
+
 const UserSchema = mongooese.Schema(
   {
     name: {
@@ -33,6 +34,7 @@ const UserSchema = mongooese.Schema(
       enum: ["user", "manager", "admin"],
       default: "user",
     },
+    wishlist: [{ type: mongooese.Schema.ObjectId, ref: "Product" }],
   },
 
   { timestamps: true },
