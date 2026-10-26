@@ -35,6 +35,16 @@ const UserSchema = mongooese.Schema(
       default: "user",
     },
     wishlist: [{ type: mongooese.Schema.ObjectId, ref: "Product" }],
+    addresses: [
+      {
+        id: { type: mongooese.Schema.Types.ObjectId },
+        alias: String,
+        details: String,
+        phone: String,
+        city: String,
+        postalCode: String,
+      },
+    ],
   },
 
   { timestamps: true },

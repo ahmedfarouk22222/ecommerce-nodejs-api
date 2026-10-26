@@ -15,6 +15,7 @@ const UserRoute = require("./routes/user/user_route");
 const AuthRoute = require("./routes/auth/auth_route");
 const ReviewsRoute = require("./routes/reviews/reviews_route");
 const AddToWishListRoute = require("./routes/user/add_to_wishlist");
+const AddToAddressesRoute = require("./routes/user/addreses_route");
 
 //DBConnection
 dbConnection();
@@ -38,6 +39,7 @@ app.use("/api/v1/Users", UserRoute);
 app.use("/api/v1/auth", AuthRoute);
 app.use("/api/v1/Reviews", ReviewsRoute);
 app.use("/api/v1/wishlist", AddToWishListRoute);
+app.use("/api/v1/addresses", AddToAddressesRoute);
 
 app.all("/*splat", (req, res, next) => {
   const err = new ApiError(
