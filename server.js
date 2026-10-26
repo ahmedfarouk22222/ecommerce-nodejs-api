@@ -7,16 +7,7 @@ dotenv.config({ path: "config.env" });
 const ApiError = require("./utils/api_error");
 const dbConnection = require("./config/database");
 const globalError = require("./middlewares/error_middlewares");
-const categoryRoute = require("./routes/category/category_route");
-const subCategoryRoute = require("./routes/category/sub_category_route");
-const brandRoute = require("./routes/brand/brands_route");
-const productRoute = require("./routes/product/product_route");
-const UserRoute = require("./routes/user/user_route");
-const AuthRoute = require("./routes/auth/auth_route");
-const ReviewsRoute = require("./routes/reviews/reviews_route");
-const AddToWishListRoute = require("./routes/user/add_to_wishlist");
-const AddToAddressesRoute = require("./routes/user/addreses_route");
-
+const mountRoutes = require("./routes/index");
 //DBConnection
 dbConnection();
 
@@ -31,15 +22,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 //Mount Routes
-app.use("/api/v1/categories", categoryRoute);
-app.use("/api/v1/subcategories", subCategoryRoute);
-app.use("/api/v1/Brands", brandRoute);
-app.use("/api/v1/Products", productRoute);
-app.use("/api/v1/Users", UserRoute);
-app.use("/api/v1/auth", AuthRoute);
-app.use("/api/v1/Reviews", ReviewsRoute);
-app.use("/api/v1/wishlist", AddToWishListRoute);
-app.use("/api/v1/addresses", AddToAddressesRoute);
+mountRoutes(app);
 
 app.all("/*splat", (req, res, next) => {
   const err = new ApiError(
