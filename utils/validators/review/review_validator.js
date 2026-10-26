@@ -50,7 +50,7 @@ exports.updateReviewValidator = [
         throw new Error("Review not found");
       }
 
-      if (review.user.toString() !== req.user.id.toString()) {
+      if (review.user.id.toString() !== req.user.id.toString()) {
         throw new Error("You are not allowed to update this review");
       }
 
@@ -74,7 +74,7 @@ exports.deleteReviewValidator = [
 
       if (
         req.user.role === "user" &&
-        review.user.toString() !== req.user.id.toString()
+        review.user.id.toString() !== req.user.id.toString()
       ) {
         throw new Error("You are not allowed to delete this review");
       }

@@ -9,6 +9,7 @@ exports.deleteOne = (model) =>
     if (!deleteDocument) {
       return next(new ApiError(`Document not found by this id: ${id}`, 404));
     }
+    deleteDocument.remove();
     res.status(204).send();
   });
 exports.updateOne = (model) =>
@@ -26,6 +27,7 @@ exports.updateOne = (model) =>
         new ApiError(`Brand not found by this id: ${req.params.id}`, 404),
       );
     }
+    updateDocument.save();
 
     res.status(200).json({ data: updateDocument });
   });
