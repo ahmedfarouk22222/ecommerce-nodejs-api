@@ -10,7 +10,7 @@ exports.deleteOne = (model) =>
     if (!deleteDocument) {
       return next(new ApiError(`Document not found by this id: ${id}`, 404));
     }
-    deleteDocument.remove();
+
     res.status(204).send();
   });
 exports.updateOne = (model) =>
@@ -65,7 +65,7 @@ exports.getAll = (Model, modelName = "") =>
     // Build query
     const documentsCounts = await Model.countDocuments();
     const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
-      .paginate(documentsCounts)
+      .pagination(documentsCounts)
       .filter()
       .search(modelName)
       .limitFields()
