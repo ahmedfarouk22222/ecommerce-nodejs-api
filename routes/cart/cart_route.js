@@ -1,6 +1,10 @@
 const express = require("express");
 
-const { addProductToCart } = require("../../services/cart/cart_service");
+const {
+  addProductToCart,
+  getLogedUserCart,
+  applyCoupon,
+} = require("../../services/cart/cart_service");
 // const {
 //   createBrandValidator,
 //   getBrandValidator,
@@ -10,10 +14,10 @@ const { addProductToCart } = require("../../services/cart/cart_service");
 
 const router = express.Router();
 const AuthService = require("../../services/auth/auth_service");
+router.use(AuthService.protect, AuthService.allowedTo("user"));
 
-router
-  .route("/")
-  .post(AuthService.protect, AuthService.allowedTo("user"), addProductToCart);
+router.route("/").post(addProductToCart).get(getLogedUserCart);
+router.route("/applyCoupon").put(applyCoupon);
 //   .get(getBrands);
 // router
 //   .route("/:id")
