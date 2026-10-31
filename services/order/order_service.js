@@ -1,10 +1,10 @@
-const slugify = require("slugify");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const asyncHandler = require("express-async-handler");
 const productModel = require("../../models/product/product_model");
 const CartModel = require("../../models/cart/cart_model");
 const OrderModel = require("../../models/order/order_model");
 const ApiError = require("../../utils/api_error");
-const handelerFactory = require("../handlerer_factory");
+const factory = require("../handlerer_factory");
 
 exports.createCashOrder = asyncHandler(async (req, res) => {
   const cart = await CartModel.findById(req.params.cartId);
@@ -41,12 +41,12 @@ exports.filterOrderForLoggedUser = asyncHandler(async (req, res, next) => {
 // @desc    Get all orders
 // @route   POST /api/v1/orders
 // @access  Protected/User-Admin-Manager
-exports.findAllOrders = factory.getAll(Order);
+exports.findAllOrders = factory.getAll(OrderModel);
 
 // @desc    Get all orders
 // @route   POST /api/v1/orders
 // @access  Protected/User-Admin-Manager
-exports.findSpecificOrder = factory.getOne(Order);
+exports.findSpecificOrder = factory.getOne(OrderModel);
 
 // @desc    Update order paid status to paid
 // @route   PUT /api/v1/orders/:id/pay
@@ -196,4 +196,37 @@ exports.webhookCheckout = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ received: true });
+});
+exports.checkoutSession = asyncHandler(async (req, res, next) => {
+  const cart = await CartModel.findById(req.params.cartId);
+  if (!cart) {
+    return next(
+      new ApiError(`cart not found by this id: ${req.params.cartId}`, 404),
+    );
+  }
+  const orderPrice = cart.totalCartPriceAfterDiscount
+    ? cart.totalCartPriceAfterDiscount
+    : cart.totalCartPrice;
+  const totalOrderPrice = orderPrice;
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "egp",
+          product_data: {
+            name: `Order for ${req.user.name}`,
+          },
+          unit_amount: totalOrderPrice * 100,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${req.protocol}://${req.get("host")}/orders`,
+    cancel_url: `${req.protocol}://${req.get("host")}/cart`,
+    customer_email: req.user.email,
+    client_reference_id: req.params.cartId,
+    metadata: req.body.shippingAddress,
+  });
+  res.status(200).json({ status: "success", session });
 });

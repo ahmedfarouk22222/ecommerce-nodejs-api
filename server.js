@@ -1,17 +1,24 @@
 const path = require("path");
 const express = require("express");
 const dotenv = require("dotenv");
-const morgan = require("morgan");
 
+// Load Environment Variables
 dotenv.config({ path: "config.env" });
+
+const morgan = require("morgan");
+const cors = require("cors");
+const compression = require("compression");
 const ApiError = require("./utils/api_error");
 const dbConnection = require("./config/database");
 const globalError = require("./middlewares/error_middlewares");
 const mountRoutes = require("./routes/index");
-//DBConnection
-dbConnection();
 
+// DB Connection
+dbConnection();
 const app = express();
+app.use(cors());
+app.use(compression());
+app.options("/{*splat}", cors());
 app.set("query parser", "extended");
 
 app.use(express.json());

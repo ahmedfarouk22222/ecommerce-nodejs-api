@@ -29,9 +29,9 @@ const orderSchema = mongoose.Schema(
     paymentType: { type: String, enum: ["cash", "Card"], default: "cash" },
 
     isPaid: { type: Boolean, default: false },
-    paidAt: Date(),
+    paidAt: Date,
     isDeliverd: { type: Boolean, default: false },
-    DeliverddAt: Date(),
+    DeliverddAt: Date,
   },
   { timestamps: true },
 );
