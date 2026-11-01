@@ -12,6 +12,7 @@ const ApiError = require("./utils/api_error");
 const dbConnection = require("./config/database");
 const globalError = require("./middlewares/error_middlewares");
 const mountRoutes = require("./routes/index");
+const rateLimit = require("express-rate-limit");
 
 // DB Connection
 dbConnection();
@@ -22,11 +23,19 @@ app.options("/{*splat}", cors());
 app.set("query parser", "extended");
 
 app.use(express.json());
+app.use(express.json({ limit: "20kb" }));
 app.use(express.static(path.join(__dirname, "uploads")));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log(`mode: ${process.env.NODE_ENV}`);
 }
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests from this IP, please try again after 15 minutes",
+});
+
+app.use("/api", limiter);
 
 //Mount Routes
 mountRoutes(app);
